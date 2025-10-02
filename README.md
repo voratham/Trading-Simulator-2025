@@ -3,9 +3,6 @@
 A single-file Python project for simulating trading strategies with mock price data.  
 Perfect for Hacktoberfest contributors — add new strategies, risk metrics, or visualization features!
 
-**Repo name:** `hacktoberfest-trading-simulator-2025`  
-**File name:** `trading_simulator.py`
-
 ---
 
 ## Features
