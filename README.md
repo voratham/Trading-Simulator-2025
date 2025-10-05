@@ -6,6 +6,7 @@ Perfect for Hacktoberfest contributors — add new strategies, risk metrics, or 
 ---
 
 ## Features
+
 - Generates synthetic market price data
 - Implements a sample Moving Average Crossover strategy
 - Backtests trading signals
@@ -18,3 +19,7 @@ Perfect for Hacktoberfest contributors — add new strategies, risk metrics, or 
 
 ```bash
 python trading_simulator.py --strategy sma --cash 10000 --days 200
+
+python trading_simulator.py --strategy ema --cash 10000 --days 200
+
+```

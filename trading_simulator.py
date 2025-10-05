@@ -1,4 +1,3 @@
-```python
 #!/usr/bin/env python3
 """
 Hacktoberfest Trading Simulator 2025
@@ -11,6 +10,8 @@ import statistics
 from typing import List, Tuple
 
 # ----------------- Data Generator -----------------
+
+
 def generate_price_series(days: int, start: float = 100.0) -> List[float]:
     """Generate synthetic stock prices using random walk."""
     prices = [start]
@@ -20,6 +21,8 @@ def generate_price_series(days: int, start: float = 100.0) -> List[float]:
     return prices
 
 # ----------------- Strategy -----------------
+
+
 def sma_crossover(prices: List[float], short: int = 10, long: int = 30) -> List[int]:
     """Simple Moving Average Crossover strategy.
     Returns a list of signals: 1 = buy, -1 = sell, 0 = hold
@@ -34,7 +37,32 @@ def sma_crossover(prices: List[float], short: int = 10, long: int = 30) -> List[
             signals[i] = -1
     return signals
 
+
+def ema_crossover(prices: List[float], short: int = 10, long: int = 30) -> List[int]:
+    """Exponential Moving Average Crossover strategy.
+    Returns a list of signals: 1 = buy, -1 = sell, 0 = hold
+    """
+    def ema(prices: List[float], period: int) -> List[float]:
+        ema_values = [prices[0]]
+        k = 2 / (period + 1)
+        for price in prices[1:]:
+            ema_values.append(price * k + ema_values[-1] * (1 - k))
+        return ema_values
+
+    short_ema = ema(prices, short)
+    long_ema = ema(prices, long)
+    signals = [0] * len(prices)
+    for i in range(long, len(prices)):
+        if short_ema[i] > long_ema[i]:
+            signals[i] = 1
+        elif short_ema[i] < long_ema[i]:
+            signals[i] = -1
+    return signals
+
+
 # ----------------- Backtesting -----------------
+
+
 def backtest(prices: List[float], signals: List[int], initial_cash: float = 10000) -> dict:
     cash = initial_cash
     position = 0  # number of shares
@@ -67,7 +95,8 @@ def backtest(prices: List[float], signals: List[int], initial_cash: float = 1000
         sell_price = trades[i][1]
         trade_results.append((sell_price - buy_price) / buy_price)
 
-    win_rate = sum(1 for r in trade_results if r > 0) / len(trade_results) * 100 if trade_results else 0
+    win_rate = sum(1 for r in trade_results if r > 0) / \
+        len(trade_results) * 100 if trade_results else 0
     max_drawdown = min((balance - max(balance_history[:i+1])) / max(balance_history[:i+1]) * 100
                        for i, balance in enumerate(balance_history)) if balance_history else 0
 
@@ -80,11 +109,18 @@ def backtest(prices: List[float], signals: List[int], initial_cash: float = 1000
     }
 
 # ----------------- CLI -----------------
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Hacktoberfest Trading Simulator 2025")
-    parser.add_argument("--strategy", choices=["sma"], default="sma", help="Trading strategy")
-    parser.add_argument("--cash", type=float, default=10000, help="Initial cash")
-    parser.add_argument("--days", type=int, default=200, help="Number of days for simulation")
+    parser = argparse.ArgumentParser(
+        description="Hacktoberfest Trading Simulator 2025")
+    parser.add_argument(
+        "--strategy", choices=["sma", "ema"], default="sma", help="Trading strategy")
+
+    parser.add_argument("--cash", type=float,
+                        default=10000, help="Initial cash")
+    parser.add_argument("--days", type=int, default=200,
+                        help="Number of days for simulation")
     args = parser.parse_args()
 
     prices = generate_price_series(args.days)
@@ -99,6 +135,18 @@ def main():
         print(f"Total Trades: {results['trades']}")
         print(f"Win Rate: {results['win_rate']}%")
         print(f"Max Drawdown: {results['max_drawdown']}%")
+
+    if args.strategy == "ema":
+        signals = ema_crossover(prices)
+        results = backtest(prices, signals, args.cash)
+        print("\n📈 Hacktoberfest Trading Simulator 2025")
+        print(f"Strategy: EMA Crossover")
+        print(f"Initial Cash: {results['initial']}")
+        print(f"Final Balance: {results['final']}")
+        print(f"Total Trades: {results['trades']}")
+        print(f"Win Rate: {results['win_rate']}%")
+        print(f"Max Drawdown: {results['max_drawdown']}%")
+
 
 if __name__ == "__main__":
     main()
